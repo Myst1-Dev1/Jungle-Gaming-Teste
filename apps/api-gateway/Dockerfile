@@ -20,4 +20,4 @@ COPY --from=builder /app/node_modules ./node_modules
 
 COPY --from=builder /app/apps/api-gateway/dist ./dist
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]

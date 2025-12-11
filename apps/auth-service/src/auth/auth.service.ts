@@ -8,6 +8,7 @@ import {
   Injectable,
   ConflictException,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -23,18 +24,25 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const exists = await this.users.findByEmail(dto.email);
-    if (exists) throw new ConflictException('Email already in use');
+    try {
+      const exists = await this.users.findByEmail(dto.email);
+      if (exists) throw new ConflictException('Email already in use');
 
-    const hashed = await bcrypt.hash(dto.password, 10);
+      const hashed = await bcrypt.hash(dto.password, 10);
 
-    const user = await this.users.create({
-      email: dto.email,
-      username: dto.username,
-      password: hashed,
-    });
+      const user = await this.users.create({
+        email: dto.email,
+        username: dto.username,
+        password: hashed,
+      });
 
-    return this.generateTokens(user.id, user.email, user.username);
+      return this.generateTokens(user.id, user.email, user.username);
+    } catch (error) {
+      throw new BadRequestException(
+        'Tivemos um erro ao cadastrar um usuário',
+        error,
+      );
+    }
   }
 
   async login(dto: LoginDto) {

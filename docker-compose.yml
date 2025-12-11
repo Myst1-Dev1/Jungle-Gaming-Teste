@@ -30,8 +30,8 @@ services:
       GATEWAY_PORT: 3001
       AUTH_HOST: auth-service     
       AUTH_PORT: 3002              
-      JWT_ACCESS_SECRET: your_access_secret
-      JWT_REFRESH_SECRET: your_refresh_secret
+      JWT_ACCESS_SECRET: gateway_like_boys
+      JWT_REFRESH_SECRET: refresh_like_girls
 
   auth-service:
     build:
@@ -52,6 +52,8 @@ services:
       DB_PASS: postgres
       DB_NAME: jungle_db
       AUTH_PORT: 3002
+      JWT_ACCESS_SECRET: gateway_like_boys
+      JWT_REFRESH_SECRET: refresh_like_girls
 
 volumes:
   pgdata:

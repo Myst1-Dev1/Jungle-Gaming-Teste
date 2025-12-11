@@ -27,4 +27,10 @@ export class AuthController {
   validate(@Payload() id: string) {
     return this.auth.validate(id);
   }
+
+  @MessagePattern('ping')
+  ping(data) {
+    console.log('PING RECEBIDO NO AUTH SERVICE!', data);
+    return { ok: true };
+  }
 }

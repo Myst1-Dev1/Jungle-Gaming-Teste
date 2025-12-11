@@ -1,14 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ThrottlerGuard } from '@nestjs/throttler';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './logger/winston.config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger(winstonConfig),
+  });
 
-  app.useGlobalGuards(app.get(ThrottlerGuard));
+  const globalPrefix = 'api';
+
+  app.setGlobalPrefix(globalPrefix);
 
   app.useGlobalPipes(new ValidationPipe());
 
@@ -23,6 +28,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.GATEWAY_PORT || 3001);
+
+  Logger.log(
+    `Api gateway is running on https://localhost/${globalPrefix}/${process.env.GATEWAY_PORT}`,
+  );
 }
 bootstrap();
