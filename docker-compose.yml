@@ -6,13 +6,32 @@ services:
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASS:-postgres}
-      POSTGRES_DB: ${DB_NAME:-auth_db}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jungle_db
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+    container_name: api-gateway
+    restart: always
+    env_file:
+      - ./apps/api-gateway/.env
+    depends_on:
+      - auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      GATEWAY_PORT: 3001
+      AUTH_HOST: auth-service     
+      AUTH_PORT: 3002              
+      JWT_ACCESS_SECRET: your_access_secret
+      JWT_REFRESH_SECRET: your_refresh_secret
 
   auth-service:
     build:

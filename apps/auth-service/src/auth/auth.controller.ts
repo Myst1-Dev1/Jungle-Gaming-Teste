@@ -18,6 +18,11 @@ export class AuthController {
     return this.auth.login(dto);
   }
 
+  @MessagePattern('auth.refresh')
+  refresh(@Payload() refreshToken: string) {
+    return this.auth.refresh(refreshToken);
+  }
+
   @MessagePattern('auth.validate')
   validate(@Payload() id: string) {
     return this.auth.validate(id);

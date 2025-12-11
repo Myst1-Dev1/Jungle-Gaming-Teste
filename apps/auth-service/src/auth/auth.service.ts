@@ -1,38 +1,40 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import {
   Injectable,
   ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  constructor(private users: UserService) {}
+  constructor(
+    private users: UserService,
+    private jwt: JwtService,
+  ) {}
 
   async register(dto: RegisterDto) {
     const exists = await this.users.findByEmail(dto.email);
     if (exists) throw new ConflictException('Email already in use');
 
-    const hash = await bcrypt.hash(dto.password, 10);
+    const hashed = await bcrypt.hash(dto.password, 10);
 
     const user = await this.users.create({
       email: dto.email,
       username: dto.username,
-      password: hash,
+      password: hashed,
     });
 
-    return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-    };
+    return this.generateTokens(user.id, user.email, user.username);
   }
 
   async login(dto: LoginDto) {
@@ -42,10 +44,38 @@ export class AuthService {
     const match = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Invalid credentials');
 
+    return this.generateTokens(user.id, user.email, user.username);
+  }
+
+  async refresh(refreshToken: string) {
+    try {
+      const payload = this.jwt.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+
+      return this.generateTokens(payload.sub, payload.email, payload.username);
+    } catch (err) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  private generateTokens(id: string, email: string, username: string) {
+    const payload = { sub: id, email, username };
+
+    const accessToken = this.jwt.sign(payload, {
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwt.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
+
     return {
-      id: user.id,
-      email: user.email,
-      username: user.username,
+      accessToken,
+      refreshToken,
+      user: { id, email, username },
     };
   }
 
@@ -53,7 +83,7 @@ export class AuthService {
     const user = await this.users.findById(id);
     if (!user) return null;
 
-    const { password, ...safe } = user;
-    return safe;
+    const { password, ...rest } = user;
+    return rest;
   }
 }
