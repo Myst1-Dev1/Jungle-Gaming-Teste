@@ -12,6 +12,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+
   api-gateway:
     build:
       context: .
@@ -22,12 +33,15 @@ services:
       - ./apps/api-gateway/.env
     depends_on:
       - auth-service
+      - tasks-service
+      - rabbitmq
     ports:
       - "3001:3001"
     environment:
       GATEWAY_PORT: 3001
       AUTH_HOST: auth-service     
-      AUTH_PORT: 3002              
+      AUTH_PORT: 3002            
+      TASKS_RMQ_URL: amqp://admin:admin@rabbitmq:5672
       JWT_ACCESS_SECRET: gateway_like_boys
       JWT_REFRESH_SECRET: refresh_like_girls
 
@@ -52,6 +66,29 @@ services:
       AUTH_PORT: 3002
       JWT_ACCESS_SECRET: gateway_like_boys
       JWT_REFRESH_SECRET: refresh_like_girls
+
+  tasks-service:
+    build:
+      context: .
+      dockerfile: apps/tasks-service/Dockerfile
+    container_name: tasks-service
+    restart: always
+    env_file:
+      - ./apps/tasks-service/.env
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: jungle_db
+
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
+      TASKS_QUEUE: tasks_queue
+    ports:
+      - "3003:3003"
 
 volumes:
   pgdata:
