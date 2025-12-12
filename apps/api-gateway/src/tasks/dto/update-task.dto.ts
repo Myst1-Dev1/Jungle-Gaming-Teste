@@ -5,7 +5,20 @@ import {
   IsDateString,
   IsArray,
 } from 'class-validator';
-import { Priority, Status } from '../entities/tasks.entity';
+
+enum Priority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+enum Status {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  REVIEW = 'REVIEW',
+  DONE = 'DONE',
+}
 
 export class UpdateTaskDto {
   @IsString()

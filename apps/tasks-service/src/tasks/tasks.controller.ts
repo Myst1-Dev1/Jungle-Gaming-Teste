@@ -13,32 +13,62 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @MessagePattern('tasks.findAll')
-  findAll(@Payload() data) {
-    return this.tasksService.findAll(data.page, data.size);
+  async findAll(@Payload() data) {
+    try {
+      return await this.tasksService.findAll(data.page, data.size);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE FINDALL:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('tasks.findOne')
-  findOne(@Payload() id: string) {
-    return this.tasksService.findOne(id);
+  async findOne(@Payload() id: string) {
+    try {
+      return await this.tasksService.findOne(id);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE FINDONE:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('tasks.create')
-  create(@Payload() dto: CreateTaskDto) {
-    return this.tasksService.create(dto);
+  async create(@Payload() dto: CreateTaskDto) {
+    try {
+      return await this.tasksService.create(dto);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE CREATE:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('tasks.update')
-  update(@Payload() data: { dto: UpdateTaskDto; id: string }) {
-    return this.tasksService.update(data.id, data.dto);
+  async update(@Payload() data: { dto: UpdateTaskDto; id: string }) {
+    try {
+      return await this.tasksService.update(data.id, data.dto);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE UPDATE:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('tasks.remove')
-  remove(@Payload() id: string) {
-    return this.tasksService.remove(id);
+  async remove(@Payload() id: string) {
+    try {
+      return await this.tasksService.remove(id);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE REMOVE:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('tasks.addComment')
-  addComment(@Payload() data) {
-    return this.tasksService.addComment(data.taskId, data.dto);
+  async addComment(@Payload() data) {
+    try {
+      return await this.tasksService.addComment(data.taskId, data.dto);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE ADDCOMMENT:', err);
+      throw err;
+    }
   }
 }
