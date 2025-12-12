@@ -9,28 +9,39 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @MessagePattern('auth.register')
-  register(@Payload() dto: RegisterDto) {
-    return this.auth.register(dto);
+  async register(@Payload() dto: RegisterDto) {
+    console.log('Auth Service recebeu REGISTER:', dto);
+    try {
+      return await this.auth.register(dto);
+    } catch (err) {
+      console.error('ERRO NO AUTH SERVICE REGISTER:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('auth.login')
-  login(@Payload() dto: LoginDto) {
-    return this.auth.login(dto);
+  async login(@Payload() dto: LoginDto) {
+    console.log('Auth Service recebeu LOGIN:', dto);
+    try {
+      return await this.auth.login(dto);
+    } catch (err) {
+      console.error('ERRO NO AUTH SERVICE LOGIN:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('auth.refresh')
-  refresh(@Payload() refreshToken: string) {
-    return this.auth.refresh(refreshToken);
+  async refresh(@Payload() refreshToken: string) {
+    try {
+      return await this.auth.refresh(refreshToken);
+    } catch (err) {
+      console.error('ERRO NO AUTH SERVICE REFRESH:', err);
+      throw err;
+    }
   }
 
   @MessagePattern('auth.validate')
   validate(@Payload() id: string) {
     return this.auth.validate(id);
-  }
-
-  @MessagePattern('ping')
-  ping(data) {
-    console.log('PING RECEBIDO NO AUTH SERVICE!', data);
-    return { ok: true };
   }
 }

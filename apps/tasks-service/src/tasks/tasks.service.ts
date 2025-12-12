@@ -1,0 +1,127 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ClientProxy } from '@nestjs/microservices';
+
+import { Task } from './entities/tasks.entity';
+import { Comment } from './entities/comment.entity';
+import { TaskHistory } from './entities/task-history.entity';
+
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { AddCommentDto } from './dto/add-comment.dto';
+
+@Injectable()
+export class TasksService {
+  constructor(
+    @InjectRepository(Task)
+    private tasksRepo: Repository<Task>,
+
+    @InjectRepository(Comment)
+    private commentsRepo: Repository<Comment>,
+
+    @InjectRepository(TaskHistory)
+    private historyRepo: Repository<TaskHistory>,
+
+    private readonly rmqClient: ClientProxy,
+  ) {}
+
+  async findAll(page = 1, size = 10) {
+    const skip = (page - 1) * size;
+
+    const [data, total] = await this.tasksRepo.findAndCount({
+      skip,
+      take: size,
+      relations: ['comments', 'history'],
+      order: { id: 'DESC' },
+    });
+
+    return {
+      page,
+      size,
+      total,
+      data,
+    };
+  }
+
+  async findOne(id: string) {
+    const task = await this.tasksRepo.findOne({
+      where: { id },
+      relations: ['comments', 'history'],
+    });
+
+    if (!task) throw new NotFoundException('Task não encontrada');
+
+    return task;
+  }
+
+  async create(dto: CreateTaskDto) {
+    const task = this.tasksRepo.create({
+      ...dto,
+      assignedUserIds: dto.assignedUsers?.map(String) ?? [],
+    });
+
+    await this.tasksRepo.save(task);
+
+    await this.createHistory(task.id, 'TASK_CREATED');
+
+    this.rmqClient.emit('task.created', task);
+
+    return task;
+  }
+
+  async update(id: string, dto: UpdateTaskDto) {
+    const task = await this.findOne(id);
+
+    Object.assign(task, dto);
+
+    await this.tasksRepo.save(task);
+
+    await this.createHistory(id, 'TASK_UPDATED');
+
+    this.rmqClient.emit('task.updated', task);
+
+    return task;
+  }
+
+  async remove(id: string) {
+    const task = await this.findOne(id);
+
+    await this.tasksRepo.remove(task);
+
+    this.rmqClient.emit('task.deleted', { id });
+
+    return { deleted: true };
+  }
+
+  async addComment(taskId: string, dto: AddCommentDto) {
+    const task = await this.findOne(taskId);
+
+    const comment = this.commentsRepo.create({
+      taskId: task.id,
+      authorId: dto.userId,
+      content: dto.message,
+      task,
+    });
+
+    await this.commentsRepo.save(comment);
+
+    await this.createHistory(task.id, `Comentário adicionado`, dto.userId);
+
+    return comment;
+  }
+
+  private async createHistory(
+    taskId: string,
+    change: string,
+    changedBy?: string,
+  ) {
+    const history = this.historyRepo.create({
+      taskId,
+      change,
+      changedBy: changedBy ?? null,
+    });
+
+    await this.historyRepo.save(history);
+  }
+}
