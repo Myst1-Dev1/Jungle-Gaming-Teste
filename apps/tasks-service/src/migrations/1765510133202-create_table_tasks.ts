@@ -1,9 +1,4 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class CreateTableTasks1765510133202 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -15,7 +10,6 @@ export class CreateTableTasks1765510133202 implements MigrationInterface {
             name: 'id',
             type: 'uuid',
             isPrimary: true,
-            generationStrategy: 'uuid',
             default: 'gen_random_uuid()',
           },
           {
@@ -30,7 +24,7 @@ export class CreateTableTasks1765510133202 implements MigrationInterface {
           },
           {
             name: 'deadline',
-            type: 'timestamp',
+            type: 'timestamp with time zone',
             isNullable: true,
           },
           {
@@ -46,62 +40,32 @@ export class CreateTableTasks1765510133202 implements MigrationInterface {
             default: `'TODO'`,
           },
           {
+            name: 'assigned_user_ids',
+            type: 'uuid',
+            isArray: true,
+            default: "'{}'",
+          },
+          {
             name: 'created_at',
-            type: 'timestamp',
+            type: 'timestamp with time zone',
             default: 'now()',
           },
           {
             name: 'updated_at',
-            type: 'timestamp',
+            type: 'timestamp with time zone',
             default: 'now()',
-            onUpdate: 'CURRENT_TIMESTAMP',
-          },
-        ],
-      }),
-      true,
-    );
-
-    await queryRunner.createTable(
-      new Table({
-        name: 'tasks_users_users',
-        columns: [
-          {
-            name: 'tasksId',
-            type: 'uuid',
-            isPrimary: true,
           },
           {
-            name: 'usersId',
-            type: 'uuid',
-            isPrimary: true,
+            name: 'deleted_at',
+            type: 'timestamp with time zone',
+            isNullable: true,
           },
         ],
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      'tasks_users_users',
-      new TableForeignKey({
-        columnNames: ['tasksId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'tasks',
-        onDelete: 'CASCADE',
-      }),
-    );
-
-    await queryRunner.createForeignKey(
-      'tasks_users_users',
-      new TableForeignKey({
-        columnNames: ['usersId'],
-        referencedColumnNames: ['id'],
-        referencedTableName: 'users',
-        onDelete: 'CASCADE',
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('tasks_users_users');
     await queryRunner.dropTable('tasks');
   }
 }

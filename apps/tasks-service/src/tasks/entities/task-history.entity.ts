@@ -3,31 +3,25 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
-import { Task } from './tasks.entity';
 
 @Entity({ name: 'task_history' })
 export class TaskHistory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('uuid')
+  @Column({ type: 'uuid', name: 'task_id' })
   taskId: string;
 
-  @ManyToOne(() => Task, (task) => task.history, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'taskId' })
-  task: Task;
-
-  @Column({ type: 'text' })
+  @Column()
   change: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'uuid', name: 'changed_by', nullable: true })
   changedBy?: string | null;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    name: 'created_at',
+  })
   createdAt: Date;
 }

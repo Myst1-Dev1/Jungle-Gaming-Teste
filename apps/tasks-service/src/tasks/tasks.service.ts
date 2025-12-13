@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ClientProxy } from '@nestjs/microservices';
@@ -23,6 +23,7 @@ export class TasksService {
     @InjectRepository(TaskHistory)
     private historyRepo: Repository<TaskHistory>,
 
+    @Inject('RMQ_SERVICE')
     private readonly rmqClient: ClientProxy,
   ) {}
 
@@ -32,7 +33,6 @@ export class TasksService {
     const [data, total] = await this.tasksRepo.findAndCount({
       skip,
       take: size,
-      relations: ['comments', 'history'],
       order: { id: 'DESC' },
     });
 
@@ -118,7 +118,7 @@ export class TasksService {
   ) {
     const history = this.historyRepo.create({
       taskId,
-      change,
+      change: 'TASK_CREATED',
       changedBy: changedBy ?? null,
     });
 

@@ -10,7 +10,9 @@ import { TasksController } from './tasks.controller';
         name: 'TASK_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672'],
+          urls: [
+            process.env.RABBITMQ_URL || 'amqp://admin:admin@rabbitmq:5672',
+          ],
           queue: 'tasks_queue',
           queueOptions: {
             durable: true,

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,7 +8,7 @@ import {
   Index,
   OneToMany,
 } from 'typeorm';
-import { TaskHistory } from './task-history.entity';
+import { Comment } from './comment.entity';
 
 export enum Priority {
   LOW = 'LOW',
@@ -39,7 +37,7 @@ export class Task {
   description?: string | null;
 
   @Column({ type: 'timestamp with time zone', nullable: true })
-  dueDate?: Date | null;
+  deadline?: Date | null;
 
   @Column({
     type: 'enum',
@@ -55,21 +53,32 @@ export class Task {
   })
   status: Status;
 
-  @OneToMany(() => Comment, (c: any) => c.task, { cascade: true })
-  comments: Comment[];
-
-  @OneToMany(() => TaskHistory, (h) => h.task, { cascade: true })
-  history: TaskHistory[];
-
-  @Column('text', { array: true, default: () => 'ARRAY[]::text[]' })
+  @Column('uuid', {
+    name: 'assigned_user_ids',
+    array: true,
+    default: () => 'ARRAY[]::uuid[]',
+  })
   assignedUserIds: string[];
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @OneToMany(() => Comment, (comment) => comment.task, { cascade: true })
+  comments: Comment[];
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    name: 'created_at',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+    name: 'updated_at',
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({ type: 'timestamp with time zone', nullable: true })
+  @DeleteDateColumn({
+    type: 'timestamp with time zone',
+    name: 'deleted_at',
+    nullable: true,
+  })
   deletedAt?: Date | null;
 }

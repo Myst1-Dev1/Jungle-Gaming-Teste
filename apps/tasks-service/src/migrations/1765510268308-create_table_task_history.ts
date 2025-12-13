@@ -1,28 +1,43 @@
-import { MigrationInterface, QueryRunner } from 'typeorm';
+import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 export class CreateTableTaskHistory1765510268308 implements MigrationInterface {
-  name = 'CreateTableTaskHistory1765510268308';
-
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
-      CREATE TABLE task_history (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        task_id UUID NOT NULL,
-        user_id UUID NOT NULL,
-        action VARCHAR(255) NOT NULL,
-        old_value JSONB,
-        new_value JSONB,
-        created_at TIMESTAMP DEFAULT NOW(),
-
-        CONSTRAINT fk_history_task
-          FOREIGN KEY (task_id)
-          REFERENCES tasks(id)
-          ON DELETE CASCADE
-      );
-    `);
+    await queryRunner.createTable(
+      new Table({
+        name: 'task_history',
+        columns: [
+          {
+            name: 'id',
+            type: 'uuid',
+            isPrimary: true,
+            generationStrategy: 'uuid',
+            default: 'gen_random_uuid()',
+          },
+          {
+            name: 'task_id',
+            type: 'uuid',
+          },
+          {
+            name: 'change',
+            type: 'varchar',
+            length: '255',
+          },
+          {
+            name: 'changed_by',
+            type: 'uuid',
+            isNullable: true,
+          },
+          {
+            name: 'created_at',
+            type: 'timestamp with time zone',
+            default: 'now()',
+          },
+        ],
+      }),
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE task_history;`);
+    await queryRunner.dropTable('task_history');
   }
 }
