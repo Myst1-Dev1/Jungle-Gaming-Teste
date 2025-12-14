@@ -13,21 +13,24 @@ export class Comment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('uuid')
+  @Column({ type: 'uuid', name: 'task_id' })
   taskId: string;
 
   @ManyToOne(() => Task, (task) => task.comments, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'taskId' })
+  @JoinColumn({ name: 'task_id' })
   task: Task;
 
-  @Column('uuid')
-  authorId: string;
+  @Column({ type: 'uuid', name: 'author_id', nullable: true })
+  authorId: string | null;
 
   @Column({ type: 'text' })
   content: string;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    name: 'created_at',
+  })
   createdAt: Date;
 }

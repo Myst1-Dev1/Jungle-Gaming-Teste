@@ -32,7 +32,7 @@ export class TasksController {
     }
   }
 
-  @MessagePattern('tasks.create')
+  @MessagePattern('tasks.created')
   async create(@Payload() dto: CreateTaskDto) {
     try {
       return await this.tasksService.create(dto);
@@ -42,7 +42,7 @@ export class TasksController {
     }
   }
 
-  @MessagePattern('tasks.update')
+  @MessagePattern('tasks.updated')
   async update(@Payload() data: { dto: UpdateTaskDto; id: string }) {
     try {
       return await this.tasksService.update(data.id, data.dto);
@@ -52,7 +52,7 @@ export class TasksController {
     }
   }
 
-  @MessagePattern('tasks.remove')
+  @MessagePattern('tasks.removed')
   async remove(@Payload() id: string) {
     try {
       return await this.tasksService.remove(id);

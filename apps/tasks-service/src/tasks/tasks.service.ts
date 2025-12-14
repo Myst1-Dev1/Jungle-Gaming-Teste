@@ -33,7 +33,7 @@ export class TasksService {
     const [data, total] = await this.tasksRepo.findAndCount({
       skip,
       take: size,
-      order: { id: 'DESC' },
+      order: { createdAt: 'DESC' },
     });
 
     return {
@@ -47,7 +47,7 @@ export class TasksService {
   async findOne(id: string) {
     const task = await this.tasksRepo.findOne({
       where: { id },
-      relations: ['comments', 'history'],
+      relations: ['comments'],
     });
 
     if (!task) throw new NotFoundException('Task não encontrada');
@@ -85,9 +85,11 @@ export class TasksService {
   }
 
   async remove(id: string) {
-    const task = await this.findOne(id);
+    const result = await this.tasksRepo.delete({ id });
 
-    await this.tasksRepo.remove(task);
+    if (result.affected === 0) {
+      throw new NotFoundException('Task não encontrada');
+    }
 
     this.rmqClient.emit('task.deleted', { id });
 
@@ -98,10 +100,9 @@ export class TasksService {
     const task = await this.findOne(taskId);
 
     const comment = this.commentsRepo.create({
-      taskId: task.id,
+      taskId,
       authorId: dto.userId,
       content: dto.message,
-      task,
     });
 
     await this.commentsRepo.save(comment);
@@ -118,7 +119,7 @@ export class TasksService {
   ) {
     const history = this.historyRepo.create({
       taskId,
-      change: 'TASK_CREATED',
+      change,
       changedBy: changedBy ?? null,
     });
 

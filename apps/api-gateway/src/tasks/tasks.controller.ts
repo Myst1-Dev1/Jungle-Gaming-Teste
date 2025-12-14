@@ -44,19 +44,19 @@ export class TasksController {
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() dto: CreateTaskDto) {
-    return firstValueFrom(this.tasksClient.send('tasks.create', dto));
+    return firstValueFrom(this.tasksClient.send('tasks.created', dto));
   }
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateTaskDto) {
-    return firstValueFrom(this.tasksClient.send('tasks.update', { id, dto }));
+    return firstValueFrom(this.tasksClient.send('tasks.updated', { id, dto }));
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return firstValueFrom(this.tasksClient.send('tasks.remove', id));
+    return firstValueFrom(this.tasksClient.send('tasks.removed', id));
   }
 
   @UseGuards(JwtAuthGuard)
