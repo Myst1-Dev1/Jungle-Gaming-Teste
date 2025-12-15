@@ -7,6 +7,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { AddCommentDto } from './dto/add-comment.dto';
 
 @Controller()
 export class TasksController {
@@ -63,9 +64,9 @@ export class TasksController {
   }
 
   @MessagePattern('tasks.addComment')
-  async addComment(@Payload() data) {
+  async addComment(@Payload() data: { dto: AddCommentDto; id: string }) {
     try {
-      return await this.tasksService.addComment(data.taskId, data.dto);
+      return await this.tasksService.addComment(data.id, data.dto);
     } catch (err) {
       console.error('ERRO NO TASKS SERVICE ADDCOMMENT:', err);
       throw err;

@@ -100,7 +100,7 @@ export class TasksService {
     const task = await this.findOne(taskId);
 
     const comment = this.commentsRepo.create({
-      taskId,
+      task,
       authorId: dto.userId,
       content: dto.message,
     });
