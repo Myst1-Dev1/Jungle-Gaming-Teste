@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Controller,
   Get,
@@ -36,6 +35,18 @@ export class TasksController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get(':id/comments')
+  findAllComments(
+    @Param('id') taskId: string,
+    @Query('page') page: number = 1,
+    @Query('size') size: number = 10,
+  ) {
+    return firstValueFrom(
+      this.tasksClient.send('comment.findAll', { taskId, page, size }),
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return firstValueFrom(this.tasksClient.send('tasks.findOne', id));
@@ -63,7 +74,7 @@ export class TasksController {
   @Post(':id/comments')
   addComment(@Param('id') taskId: string, @Body() dto: AddCommentDto) {
     return firstValueFrom(
-      this.tasksClient.send('tasks.addComment', { taskId, dto }),
+      this.tasksClient.send('comment.new', { taskId, dto }),
     );
   }
 }

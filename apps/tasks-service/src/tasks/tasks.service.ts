@@ -84,6 +84,24 @@ export class TasksService {
     return task;
   }
 
+  async findAllComments(taskId: string, page = 1, size = 10) {
+    const skip = (page - 1) * size;
+
+    const [data, total] = await this.commentsRepo.findAndCount({
+      where: { task: { id: taskId } },
+      skip,
+      take: size,
+      order: { createdAt: 'DESC' },
+    });
+
+    return {
+      page,
+      size,
+      total,
+      data,
+    };
+  }
+
   async remove(id: string) {
     const result = await this.tasksRepo.delete({ id });
 
@@ -108,6 +126,8 @@ export class TasksService {
     await this.commentsRepo.save(comment);
 
     await this.createHistory(task.id, `Comentário adicionado`, dto.userId);
+
+    this.rmqClient.emit('comment.new', { comment });
 
     return comment;
   }

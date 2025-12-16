@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-// tasks-service/src/tasks/tasks.controller.ts
-import { Controller } from '@nestjs/common';
+import { Controller, Param } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 import { TasksService } from './tasks.service';
@@ -14,9 +11,9 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @MessagePattern('tasks.findAll')
-  async findAll(@Payload() data) {
+  async findAll() {
     try {
-      return await this.tasksService.findAll(data.page, data.size);
+      return await this.tasksService.findAll();
     } catch (err) {
       console.error('ERRO NO TASKS SERVICE FINDALL:', err);
       throw err;
@@ -24,7 +21,7 @@ export class TasksController {
   }
 
   @MessagePattern('tasks.findOne')
-  async findOne(@Payload() id: string) {
+  async findOne(@Param() id: string) {
     try {
       return await this.tasksService.findOne(id);
     } catch (err) {
@@ -63,7 +60,17 @@ export class TasksController {
     }
   }
 
-  @MessagePattern('tasks.addComment')
+  @MessagePattern('comment.findAll')
+  async findAllComments(@Param() taskId: string) {
+    try {
+      return await this.tasksService.findAllComments(taskId);
+    } catch (err) {
+      console.error('ERRO NO TASKS SERVICE FINDALLCOMMENTS:', err);
+      throw err;
+    }
+  }
+
+  @MessagePattern('comment.new')
   async addComment(@Payload() data: { dto: AddCommentDto; id: string }) {
     try {
       return await this.tasksService.addComment(data.id, data.dto);
