@@ -39,8 +39,8 @@ services:
       - "3001:3001"
     environment:
       GATEWAY_PORT: 3001
-      AUTH_HOST: auth-service     
-      AUTH_PORT: 3002            
+      AUTH_HOST: auth-service
+      AUTH_PORT: 3002
       TASKS_RMQ_URL: amqp://admin:admin@rabbitmq:5672
       JWT_ACCESS_SECRET: gateway_like_boys
       JWT_REFRESH_SECRET: refresh_like_girls
@@ -84,11 +84,27 @@ services:
       DB_USER: postgres
       DB_PASS: postgres
       DB_NAME: jungle_db
-
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
       TASKS_QUEUE: tasks_queue
     ports:
       - "3003:3003"
+
+  notifications-service:
+    build:
+      context: .
+      dockerfile: apps/notifications-service/Dockerfile
+    container_name: notifications-service
+    restart: always
+    env_file:
+      - ./apps/notifications-service/.env
+    depends_on:
+      - rabbitmq
+    environment:
+      RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
+      RABBITMQ_QUEUE: notifications_queue
+      JWT_SECRET: socket_like_web
+    ports:
+      - "3004:3004"
 
 volumes:
   pgdata:
