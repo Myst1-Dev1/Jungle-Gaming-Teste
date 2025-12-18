@@ -116,6 +116,19 @@ export class TasksService {
     return comment;
   }
 
+  async findAllComments(taskId: string, page = 1, size = 10) {
+    const task = await this.findOne(taskId);
+
+    const skip = (page - 1) * size;
+
+    return this.commentsRepo.findAndCount({
+      where: { taskId: task.id },
+      order: { createdAt: 'DESC' },
+      skip,
+      take: size,
+    });
+  }
+
   async remove(id: string) {
     const result = await this.tasksRepo.delete({ id });
 

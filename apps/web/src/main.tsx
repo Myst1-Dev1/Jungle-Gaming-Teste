@@ -35,7 +35,13 @@ const dashboardRoute = createRoute({
   component: Dashboard,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute]);
+const taskPageRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/tasks/$id',
+  component: Dashboard,
+})
+
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, taskPageRoute]);
 
 const router = createRouter({
   routeTree,
