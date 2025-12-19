@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router"
+import { Pencil, Trash } from "lucide-react"
+import type { Task, TaskResponse } from "@/@types/Task"
 import {
   Table,
   TableBody,
@@ -9,32 +11,36 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useDeleteTask } from "@/services/hooks/useDeleteTask"
 
-type Task = {
-  id: string
-  title: string
-  description: string
-  deadline: string
-  priority: "alta" | "media" | "baixa"
-  status: "pendente" | "em_progresso" | "concluida"
-}
-
-type TaskTableProps = {
-  tasks?: Array<Task>
+interface TaskTableProps {
+  tasks?: TaskResponse;
   isLoading?: boolean
 }
 
-export function TaskTable({ tasks = [], isLoading }: TaskTableProps) {
-  if (isLoading) {
+export function TaskTable({ tasks, isLoading }: TaskTableProps) {
+  const { mutateAsync: deleteTask, isPending } = useDeleteTask()
+
+  if (isLoading || isPending) {
     return <TaskTableSkeleton />
   }
 
-  if (!tasks.length) {
+  if (!tasks?.data.length) {
     return (
       <div className="flex items-center justify-center rounded-md border p-8 text-sm text-muted-foreground">
         Nenhuma tarefa encontrada
       </div>
     )
+  }
+
+  async function handleDelete(taskId: string) {
+    const confirmed = window.confirm(
+      'Tem certeza que deseja deletar esta tarefa?'
+    )
+
+    if (!confirmed) return
+
+    await deleteTask(taskId)
   }
 
   return (
@@ -49,11 +55,12 @@ export function TaskTable({ tasks = [], isLoading }: TaskTableProps) {
             <TableHead>Prazo</TableHead>
             <TableHead>Prioridade</TableHead>
             <TableHead>Status</TableHead>
+            <TableHead>Ação</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {tasks.map((task) => (
+          {tasks.data.map((task:any) => (
             <TableRow
               key={task.id}
               className="cursor-pointer hover:bg-muted/50"
@@ -86,6 +93,11 @@ export function TaskTable({ tasks = [], isLoading }: TaskTableProps) {
                 <Badge variant="outline">
                   {statusLabel(task.status)}
                 </Badge>
+              </TableCell>
+
+              <TableCell className="flex gap-3">
+                <Pencil className="cursor-pointer h-4 w-4 text-blue-600 hover:text-blue-800 ml-4" />
+                <Trash onClick={() => handleDelete(task.id)} className="cursor-pointer h-4 w-4 text-red-600 hover:text-red-800" />
               </TableCell>
             </TableRow>
           ))}

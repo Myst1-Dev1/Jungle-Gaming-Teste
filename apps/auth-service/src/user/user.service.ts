@@ -15,6 +15,12 @@ export class UserService {
     return this.repo.findOne({ where: { id } });
   }
 
+  findAll() {
+    return this.repo.find({
+      select: ['id', 'email', 'username'],
+    });
+  }
+
   create(data: Partial<User>) {
     return this.repo.save(this.repo.create(data));
   }

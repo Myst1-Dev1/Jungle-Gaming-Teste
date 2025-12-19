@@ -1,26 +1,24 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import {
-  Outlet,
   RouterProvider,
   createRootRoute,
   createRoute,
   createRouter,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import './styles.css'
+import { QueryClientProvider } from '@tanstack/react-query'
 import reportWebVitals from './reportWebVitals.ts'
 import { Home } from './pages/home.tsx'
 import { Dashboard } from './pages/dashboard.tsx'
+import { queryClient } from './services/query-client.ts'
+import { TaskPage } from './pages/taskPage.tsx'
+import { SocketProvider } from './providers/SocketProvider.tsx'
+import { RootLayout } from './layouts/RootLayout.tsx'
 
 const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
+  component: RootLayout,
 })
 
 const indexRoute = createRoute({
@@ -38,7 +36,7 @@ const dashboardRoute = createRoute({
 const taskPageRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/tasks/$id',
-  component: Dashboard,
+  component: TaskPage,
 })
 
 const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, taskPageRoute]);
@@ -63,7 +61,11 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <SocketProvider>
+          <RouterProvider router={router} />
+        </SocketProvider>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

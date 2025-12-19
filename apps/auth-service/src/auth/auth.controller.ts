@@ -30,6 +30,11 @@ export class AuthController {
     }
   }
 
+  @MessagePattern('auth.findAllUsers')
+  async findAllUsers() {
+    return await this.auth.findAllUsers();
+  }
+
   @MessagePattern('auth.refresh')
   async refresh(@Payload() refreshToken: string) {
     try {

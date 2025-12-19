@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Inject, UseGuards, Get } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from './jwt.guard';
@@ -28,8 +28,9 @@ export class AuthController {
     return firstValueFrom(this.authClient.send('auth.refresh', token));
   }
 
-  @Post('test')
-  async test(): Promise<any> {
-    return firstValueFrom(this.authClient.send('ping', { test: true }));
+  @UseGuards(JwtAuthGuard)
+  @Get('users')
+  findAllUsers() {
+    return firstValueFrom(this.authClient.send('auth.findAllUsers', {}));
   }
 }

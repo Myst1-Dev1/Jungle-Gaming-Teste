@@ -1,12 +1,13 @@
 import { useState } from "react"
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { SideBar } from "@/components/SideBar"
 import Header from "@/components/Header"
 import { TaskTable } from "@/components/TaskTable"
+import { useTasks } from "@/services/hooks/useTasks"
+import { CreateTaskModal } from "@/components/CreateTaskModal"
 
 export function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { data, isLoading } = useTasks()
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -23,10 +24,10 @@ export function Dashboard() {
           <div className="px-4 py-12">
             <div className="flex flex-wrap gap-4 lg:gap-0 justify-between items-center">
                 <h2 className="text-xl font-bold">Minhas tarefas</h2>
-                <Button size={"lg"}><Plus size={20} className="font-bold" /> Adicionar nova tarefa</Button>
+                <CreateTaskModal />
             </div>
             <div className="py-12">
-                <TaskTable />
+                <TaskTable tasks={data} isLoading={isLoading} />
             </div>
           </div>
         </main>

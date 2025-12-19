@@ -12,7 +12,7 @@ export function Home() {
                    {signType === 'signIn' && <LoginForm setSignType={setSignType} /> }
                    {signType === 'signUp' && <RegisterForm setSignType={setSignType} /> }
                 </div>
-                <div className="w-1/2 min-h-screen hidden lg:flex justify-center items-centerr bg-[#121212]">
+                <div className="w-1/2 min-h-screen hidden lg:flex justify-center items-centerr bg-[#122020]">
                     <img src="/images/Accept tasks-bro.png" alt="Login Image" className="w-md m-auto object-cover" />
                 </div>
             </div>
