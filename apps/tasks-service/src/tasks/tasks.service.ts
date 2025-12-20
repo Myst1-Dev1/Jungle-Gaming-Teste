@@ -23,8 +23,8 @@ export class TasksService {
     @InjectRepository(TaskHistory)
     private readonly historyRepo: Repository<TaskHistory>,
 
-    @Inject('RMQ_SERVICE')
-    private readonly rmqClient: ClientProxy,
+    @Inject('EVENT_BUS')
+    private readonly eventBus: ClientProxy,
   ) {}
 
   async findAll(page = 1, size = 10) {
@@ -60,7 +60,7 @@ export class TasksService {
 
     await this.createHistory(task.id, 'TASK_CREATED');
 
-    this.rmqClient.emit('task.created', {
+    this.eventBus.emit('tasks.created', {
       taskId: task.id,
       title: task.title,
       assignedUserIds: task.assignedUserIds,
@@ -80,7 +80,7 @@ export class TasksService {
 
     await this.createHistory(id, 'TASK_UPDATED');
 
-    this.rmqClient.emit('task.updated', {
+    this.eventBus.emit('tasks.updated', {
       taskId: task.id,
       oldStatus,
       newStatus: task.status,
@@ -106,7 +106,7 @@ export class TasksService {
 
     const participantUserIds = Array.from(new Set([...task.assignedUserIds]));
 
-    this.rmqClient.emit('comment.new', {
+    this.eventBus.emit('comment.new', {
       taskId: task.id,
       authorId: dto.userId,
       participantUserIds,
@@ -136,7 +136,7 @@ export class TasksService {
       throw new NotFoundException('Task não encontrada');
     }
 
-    this.rmqClient.emit('task.deleted', { taskId: id });
+    this.eventBus.emit('tasks.removed', { taskId: id });
 
     return { deleted: true };
   }

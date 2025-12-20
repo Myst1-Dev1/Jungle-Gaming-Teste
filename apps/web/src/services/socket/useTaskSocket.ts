@@ -17,6 +17,8 @@ export function useTaskSocket() {
     const onTaskCreated = (data: TaskEventPayload) => {
       alert(`🆕 Nova tarefa atribuída: ${data.title}`)
 
+      console.log('Invalidating tasks query cache...');
+
       queryClient.invalidateQueries({
         queryKey: ['tasks'],
       })
@@ -26,18 +28,24 @@ export function useTaskSocket() {
       alert(`✏️ Tarefa atualizada: ${data.title}`)
     }
 
+    const onTaskDeleted = (data: TaskEventPayload) => {
+      alert(`✏️ Tarefa deletada: ${data.title}`)
+    }
+
     const onCommentNew = () => {
       alert('💬 Novo comentário em uma tarefa sua')
     }
 
-    socket.on('task.created', onTaskCreated)
-    socket.on('task.updated', onTaskUpdated)
-    socket.on('comment.new', onCommentNew)
+    socket.on('tasks:created', onTaskCreated)
+    socket.on('tasks:updated', onTaskUpdated)
+    socket.on('tasks:deleted', onTaskDeleted)
+    socket.on('comment:new', onCommentNew)
 
     return () => {
-      socket.off('task.created', onTaskCreated)
-      socket.off('task.updated', onTaskUpdated)
-      socket.off('comment.new', onCommentNew)
+      socket.off('tasks:created', onTaskCreated)
+      socket.off('tasks:updated', onTaskUpdated)
+      socket.off('tasks:deleted', onTaskDeleted)
+      socket.off('comment:new', onCommentNew)
     }
   }, [socket, queryClient])
 }

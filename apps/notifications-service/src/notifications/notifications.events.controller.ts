@@ -27,12 +27,12 @@ type CommentNewEvent = {
 export class NotificationsEventsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @EventPattern('task.created')
+  @EventPattern('tasks.created')
   async handleTaskCreated(@Payload() event: TaskCreatedEvent) {
     await this.notificationsService.handleTaskCreated(event);
   }
 
-  @EventPattern('task.updated')
+  @EventPattern('tasks.updated')
   async handleTaskUpdated(@Payload() event: TaskUpdatedEvent) {
     await this.notificationsService.handleTaskUpdated(event);
   }
@@ -40,5 +40,10 @@ export class NotificationsEventsController {
   @EventPattern('comment.new')
   async handleCommentNew(@Payload() event: CommentNewEvent) {
     await this.notificationsService.handleCommentNew(event);
+  }
+
+  @EventPattern('tasks.removed')
+  async handleTaskRemoved(@Payload() event: { taskId: string }) {
+    await this.notificationsService.handleTaskRemoved(event);
   }
 }

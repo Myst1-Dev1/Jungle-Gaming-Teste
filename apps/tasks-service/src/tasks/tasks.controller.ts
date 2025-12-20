@@ -33,6 +33,7 @@ export class TasksController {
   @MessagePattern('tasks.created')
   async create(@Payload() dto: CreateTaskDto) {
     try {
+      console.log('CRIANDO TASK:', dto);
       return await this.tasksService.create(dto);
     } catch (err) {
       console.error('ERRO NO TASKS SERVICE CREATE:', err);

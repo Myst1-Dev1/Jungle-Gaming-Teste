@@ -8,7 +8,7 @@ export class NotificationsGateway {
 
   emitToUser(
     userId: string,
-    event: 'task:created' | 'task:updated' | 'comment:new',
+    event: 'tasks:created' | 'tasks:updated' | 'tasks:removed' | 'comment:new',
     payload: any,
   ) {
     this.server.to(userId).emit(event, payload);

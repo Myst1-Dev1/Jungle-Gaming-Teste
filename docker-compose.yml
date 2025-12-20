@@ -98,7 +98,8 @@ services:
       DB_PASS: postgres
       DB_NAME: jungle_db
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
-      TASKS_QUEUE: tasks_queue
+      RABBITMQ_QUEUE: tasks_queue
+      RABBITMQ_EVENT_QUEUE: events_queue
     ports:
       - "3003:3003"
 
@@ -115,6 +116,7 @@ services:
     environment:
       RABBITMQ_URL: amqp://admin:admin@rabbitmq:5672
       RABBITMQ_QUEUE: notifications_queue
+      RABBITMQ_EVENT_QUEUE: events_queue
       JWT_SECRET: socket_like_web
     ports:
       - "3004:3004"
